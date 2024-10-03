@@ -2,163 +2,113 @@
 
 using namespace std;
 
-struct node
-{
-	char inf[256];  // полезная информация
-	struct node* next; // ссылка на следующий элемент 
+
+struct PriorityQueue {
+
+	PriorityQueue(std::string name, int priority) {
+		this->name = name;
+		this->priority = priority;
+	}
+
+	PriorityQueue() {
+	}
+
+	PriorityQueue* left = nullptr;
+	PriorityQueue* right = nullptr;
+	string name;
+	int priority;
 };
 
-struct node* head = NULL, * last = NULL, * f = NULL; // указатели на первый и последний элементы списка
-int dlinna = 0;
-
-// Функции добавления элемента, просмотра списка
-void spstore(void), review(void), del(char* name);
-
-char find_el[256];
-struct node* find(char* name); // функция нахождения элемента
-struct node* get_struct(void); // функция создания элемента
 
 
-
-struct node* get_struct(void)
-{
-	struct node* p = NULL;
-	char s[256];
-
-	if ((p = (node*)malloc(sizeof(struct node))) == NULL)  // выделяем память под новый элемент списка
-	{
-		cout << "Ошибка при распределении памяти\n";
-		exit(1);
-	}
-
-	cout << "Введите название объекта: \n";   // вводим данные
-	cin >> s;
-	if (*s == 0)
-	{
-		cout << "Запись не была произведена\n";
-		return NULL;
-	}
-	strcpy(p->inf, s);
-
-	p->next = NULL;
-
-	return p;		// возвращаем указатель на созданный элемент
-}
-
-/* Последовательное добавление в список элемента (в конец)*/
-void spstore(void)
-{
-	struct node* p = NULL;
-	p = get_struct();
-	if (head == NULL && p != NULL)	// если списка нет, то устанавливаем голову списка
-	{
-		head = p;
-		last = p;
-	}
-	else if (head != NULL && p != NULL) // список уже есть, то вставляем в конец
-	{
-		last->next = p;
-		last = p;
-	}
-	return;
-}
+void push(PriorityQueue* queue, PriorityQueue* element) {
 
 
-/* Просмотр содержимого списка. */
-void review(void)
-{
-	struct node* struc = head;
-	if (head == NULL)
-	{
-		cout << "Список пуст\n";
-	}
-	while (struc)
-	{
-		cout << "Имя - "<< struc->inf << endl;
-		struc = struc->next;
-	}
-	return;
-}
-
-
-
-
-/* Поиск элемента по содержимому. */
-struct node* find(char* name)
-{
-	struct node* struc = head;
-	if (head == NULL)
-	{
-		cout << "Список пуст\n";
-	}
-	while (struc)
-	{
-		if (strcmp(name, struc->inf) == 0)
-		{
-			return struc;
-		}
-		struc = struc->next;
-	}
-	cout << "Элемент не найден\n";
-	return NULL;
-}
-
-/* Удаление элемента по содержимому. */
-void del(char* name)
-{
-	struct node* struc = head; // указатель, проходящий по списку установлен на начало списка
-	struct node* prev;// указатель на предшествующий удаляемому элемент
-	int flag = 0;      // индикатор отсутствия удаляемого элемента в списке
-
-	if (head == NULL) // если голова списка равна NULL, то список пуст
-	{
-		cout << "Список пуст\n";
+	if (queue->right == nullptr) {
+		queue->right = element;
+		element->left = queue;
 		return;
 	}
 
-	if (strcmp(name, struc->inf) == 0) // если удаляемый элемент - первый
-	{
-		flag = 1;
-		head = struc->next; // установливаем голову на следующий элемент
-		free(struc);  // удаляем первый элемент
-		struc = head; // устанавливаем указатель для продолжения поиска
-	}
-	else
-	{
-		prev = struc;
-		struc = struc->next;
-	}
+	PriorityQueue* new_element = new PriorityQueue;
+	new_element->name = element->name;
+	new_element->priority = element->priority;
 
-	while (struc) // проход по списку и поиск удаляемого элемента
-	{
-		if (strcmp(name, struc->inf) == 0) // если нашли, то
-		{
-			flag = 1;         // выставляем индикатор
-			if (struc->next)  // если найденный элемент не последний в списке
-			{
-				prev->next = struc->next; // меняем указатели
-				free(struc);		    // удаляем  элемент
-				struc = prev->next; // устанавливаем указатель для продолжения поиска
-			}
-			else			// если найденный элемент последний в списке
-			{
-				prev->next = NULL; // обнуляем указатель предшествующего элемента
-				free(struc);	// удаляем  элемент
-				return;
-			}
-		}
-		else 
-		{
-			prev = struc; // устанавливаем указатели для продолжения поиска
-			struc = struc->next;
-		}
-	}
+	PriorityQueue* Ptr = queue->right;
+	while (Ptr != nullptr) {
 
-	if (flag == 0)				// если флаг = 0, значит нужный элемент не найден
-	{
-		cout << "Элемент не найден\n";
-		return;
+		if (new_element->priority >= Ptr->priority) {
+			new_element->right = Ptr;
+			new_element->left = Ptr->left;
+			Ptr->left->right = new_element;
+			Ptr->left = new_element;
+			break;
+		}
+
+		if (Ptr->right == nullptr) {
+			Ptr->right = new_element;
+			new_element->left = Ptr;
+			break;
+		}
+
+		Ptr = Ptr->right;
 	}
 
 
 }
+
+
+void pop(PriorityQueue* queue) {
+
+
+	if (queue->right == nullptr) {
+		cout << "queue is empty" << endl;
+		return;
+	}
+
+	PriorityQueue* Ptr = queue->right;
+
+	queue->right = queue->right->right;
+	queue->right->right->left = queue;
+
+	delete Ptr;
+}
+
+
+int main() {
+
+
+	PriorityQueue* Head = new PriorityQueue;
+
+
+	PriorityQueue t1("vlad", 5);
+	PriorityQueue t2("egor", 20);
+	PriorityQueue t3("nikita", 13);
+	PriorityQueue t4("anton", 1);
+	PriorityQueue t5("gosha", -7);
+	PriorityQueue t6("pasha", 5);
+
+
+	push(Head, &t1);
+	push(Head, &t2);
+	push(Head, &t3);
+	push(Head, &t4);
+	push(Head, &t5);
+
+	for (PriorityQueue* ptr = Head->right; ptr != nullptr; ptr = ptr->right) {
+		cout << "name " << ptr->name << " priority " << ptr->priority << endl;
+	}
+	cout << endl << endl;
+
+	pop(Head);
+	pop(Head);
+	push(Head, &t6);
+
+	for (PriorityQueue* ptr = Head->right; ptr != nullptr; ptr = ptr->right) {
+		cout << "name " << ptr->name << " priority " << ptr->priority << endl;
+	}
+
+
+	return 0;
+}
+
