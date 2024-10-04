@@ -51,6 +51,7 @@ struct node* get_struct(void)
 void spstore(void)
 {
 	struct node* p = NULL;
+	//struct node* save;
 	p = get_struct();
 	if (head == NULL && p != NULL)	// если списка нет, то устанавливаем голову списка
 	{
@@ -59,9 +60,11 @@ void spstore(void)
 	}
 	else if (head != NULL && p != NULL) // список уже есть, то вставляем в конец
 	{
-		last->next = p;
-		last = p;
+		p->next = head;
+		head = p;
 	}
+
+	
 	return;
 }
 
